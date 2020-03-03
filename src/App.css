@@ -1,11 +1,24 @@
 @import '~antd/dist/antd.css';
 
 .App {
-	width: 50vw;
+	width: 70vw;
 	margin: 0 auto;
 	padding-top: 10vh;
+	/*border: 1px solid;*/
 }
 
-.fetchMode, .putMode {
-	height: 35vh;
+
+.cards {
+	display: flex;
+	align-items: baseline;
+	flex-wrap: wrap;
+	justify-content: space-between;
+}
+
+.ant-card-body {
+	padding: 4px;
+}
+
+.ant-card-meta-title, .ant-card-meta-description {
+	font-size: 1rem;
 }

@@ -1,78 +1,188 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import './App.css';
 import { Typography, Input, Row, Col, Card, Button, Switch} from 'antd';
-import { PoweroffOutlined } from '@ant-design/icons';
 
 function App() {
 
   // initialize antd elements
   const { Title, Text } = Typography;
   const { TextArea } = Input;
+  const {Meta} = Card;
 
-  const [checked, setChecked] = useState(true);
-  const [loading, setLoading] = useState(false);
-  const [data, setData] = useState([]);
-  const [channelURL, setChannelURL] = useState('');
+  // initialize state variables
+  const [state, setState] = useState({
+    loading: false,
+    channelURL: '',
+    textArea: ''
+  })
+  const [mode, setMode] = useState(true)  // where fetchMode = true
+  const inputEl = useRef(null); // creating a ref for input elements
+  const textEl = useRef(null);
+  const [persistedData, setPersistedData] = usePersistedState([]);
 
-  function onToggle() {
-    setChecked( prevState => !prevState)
+  function handleToggle() {  
+    // toggles the mode, empties data array, resets channelURL, clears inputEl field
+    setMode(!mode)
+    setState((prevState) => ({
+      ...prevState, 
+      data: [],
+      channelURL: ''
+    }));
+    inputEl.current.setValue('')
   }
 
-  const getData = () => {
-    setLoading(true)
-    fetch(`https://api.are.na/v2/channels/${channelURL}/contents`)
+  function usePersistedState(key, defaultValue) {
+    // create the element in local storage if it doesn't exist
+    const [state, setState] = useState(()=> {
+      return localStorage.getItem(key) || defaultValue
+    })
+
+    // update the element at [key] position with state if needed
+    useEffect(()=>{
+      if (state !== undefined) localStorage.setItem(key, state)
+    },[key, state])
+
+    return [state, setState];
+  }
+
+  const getData = async () => {
+    setState((prevState) => ({...prevState, loading: true})); //indicate loading as long as request is being processed
+
+    fetch(`https://api.are.na/v2/channels/${state.channelURL}/contents`)
     .then(response => response.json())
     .then(data => {
-      setData(data.contents); 
-      setLoading(false);
-    });
+      setState((prevState) => ({
+        ...prevState, 
+        loading: false,
+        channelURL: ''
+      })); 
+      inputEl.current.setValue('')
+      setPersistedData(data.contents)
+    })
+    .catch(error => console.log(error))
   }
 
-  loading ? console.log('loading') : console.log(data)
+  const postData = async () => {
+    setState((prevState) => ({...prevState, loading: true})); 
+
+    fetch(`https://api.are.na/v2/channels/${state.channelURL}/blocks`,{
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer d905ef20f9e5764f7a5dd418cf37c9fc68c37e6ab243343f53f9ccdcb7acbc78',
+        'Content-Type': 'application/json'
+      },
+      //make sure to serialize your JSON body
+      body: JSON.stringify({
+        content: `${state.textArea}`
+      })
+    })
+    .then( (response) => { 
+      response.json()
+    })
+    .then( (data) => {
+      console.log(data)
+      setState((prevState) => ({
+        ...prevState, 
+        loading: false,
+        channelURL: '',
+        textArea: ''
+      })); 
+      inputEl.current.setValue('')
+      textEl.current.setValue('')
+    })
+    .catch(error => console.log(error))
+  }
+
+  useEffect(()=> {
+    console.log(persistedData)
+  },[persistedData])
 
   return (
     <div className="App">
-      <Title>hooks + typescript playground</Title>
-      <Title level={4}>using are.na API</Title>
-      <Text type="secondary">This app has two modes: one that adds text blocks to an arena channel of your choice, and one that fetches content from it.</Text>
+      <Title level={2}>are.na + hooks + typescript playground</Title>
+      <Text type="secondary">This app has two modes: one that fetches content from an are.na channel of your choice and one that adds text blocks to it. For example: <Text code>https://www.are.na/kalli-retzepi/mais-oui-images</Text>
+      </Text>
 
-      {checked && 
-        <div className='fetchMode'>
+      {/*     FETCH MODE      */}
+      {mode && 
+        <div className='fetchMode' >
           <Row style={{ margin: '16px 0' }}>
             <Col span={12}>
               <Input 
               autoFocus 
               placeholder="Enter the channel URL" 
+              ref={inputEl}
               onChange={event => {
-                setChannelURL(event.target.value);
+                let inputString = event.target.value.split('/')
+                setState((prevState) => ({...prevState, channelURL: inputString[inputString.length-1]}));
               }}
               /> 
             </Col>
           </Row>      
-          <Button onClick={getData} loading={loading}> Get channel contents </Button>
+          <Button style={{ marginBottom: '2vh'}} onClick={getData} loading={state.loading}> Get channel contents </Button>
+        
+          <div className='cards'>
+            {persistedData !== undefined && 
+              persistedData.map( (item, i) => (
+              <Card
+                key={i}
+                style={{ width: '20%', alignSelf: 'stretch', margin: '1vh 1vw 1vh 0'}}
+                cover={
+                  <img
+                    alt="example"
+                    src={item.image.thumb.url}
+                  />
+                }>
+                <Meta
+                  title= {item.title}
+                  description={item.created_at}
+                />
+              </Card>
+              ))
+            }
+          </div>
         </div>
       }
 
-      {!checked && 
+      {/*     POST MODE        */}
+      {!mode && 
         <div className='putMode'>
           <Row style={{ margin: '16px 0' }}>
             <Col span={12}>
-              <Input autoFocus placeholder="Enter the channel URL" /> 
+              <Input 
+              autoFocus 
+              ref={inputEl}
+              placeholder="Enter the channel URL" 
+              onChange={event => {
+                let inputString = event.target.value.split('/')
+                setState((prevState) => ({...prevState, channelURL: inputString[inputString.length-1]}));
+              }}
+              /> 
             </Col>
           </Row>      
 
           <Row style={{ margin: '16px 0' }}>
             <Col span={12}>
-              <TextArea autoFocus placeholder="Enter your text" rows={4} />
+              <TextArea 
+                ref={textEl}
+                autoFocus 
+                placeholder="Enter your text" 
+                onChange={event => {
+                  let inputString = event.target.value
+                  setState((prevState) => ({...prevState, textArea: inputString}));
+                }}
+                rows={4} />
             </Col>
           </Row>
 
-          <Button> Add to channel </Button>
+          <Button style={{ marginBottom: '2vh'}} onClick={postData} loading={state.loading}> Add to channel </Button>
         </div>      
        }
 
-      <Row style={{ marginTop: '2vh'}}>
-        <Switch onToggle={onToggle} defaultChecked/>
+  
+      {/*     TOGGLE        */}
+      <Row style={{ margin: '2vh 0'}}>
+        <Switch onChange={handleToggle}/>
         <Text type="secondary" style={{ marginLeft: '0.2vw' }}>Toggle to other mode</Text>
       </Row>
 
