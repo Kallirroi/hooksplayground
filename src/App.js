@@ -114,10 +114,6 @@ function App() {
   }
 
   useEffect(()=> {
-    console.log(persistedData)
-  },[persistedData])
-
-  useEffect(()=> {
     document.body.style.color = themes[theme].font;
     document.body.style.backgroundColor = themes[theme].background;
     setFontColor(themes[theme].font)
@@ -214,7 +210,7 @@ function App() {
 
   
       {/*     TOGGLE        */}
-      <Row style={{ margin: '45vh 0 2vh 0'}}>
+      <Row style={{ margin: '45vh 0 5vh 0'}}>
         <Col span={6}>
           <Switch onChange={handleToggle}/>
           <Text type="secondary" style={{ color: `${fontColor}` , marginLeft: '0.2vw' }}>Toggle theme</Text>
