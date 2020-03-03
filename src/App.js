@@ -25,8 +25,8 @@ function App() {
       background: "#fff"
     },
     dark: {
-      font: "#254053",
-      background: "#5BDFBB"
+      font: "#fff",
+      background: "#171a1c"
     }
   };
   const { theme, toggleTheme } = useContext(ThemeContext);
