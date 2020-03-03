@@ -23,15 +23,15 @@ function App() {
   const [persistedData, setPersistedData] = usePersistedState([]);
 
   const themes = {
-  light: {
-    foreground: "#000000",
-    background: "#eeeeee"
-  },
-  dark: {
-    foreground: "#ffffff",
-    background: "#222222"
-  }
-};
+    light: {
+      font: "#000",
+      background: "#fff"
+    },
+    dark: {
+      font: "#fff",
+      background: "#000"
+    }
+  };
   const { theme, toggleTheme } = useContext(ThemeContext);
 
   function handleToggle() {  
@@ -112,10 +112,15 @@ function App() {
     console.log(persistedData)
   },[persistedData])
 
+  useEffect(()=> {
+    document.body.style.color = themes[theme].font;
+    document.body.style.backgroundColor = themes[theme].background;
+  },[theme])
+
   return (
-    <div className="App" style={{backgroundColor: `${themes[theme].background}`, color: `${themes[theme].foreground}` }}>
-      <Title level={2}>are.na + hooks + typescript playground</Title>
-      <Text type="secondary">This app has two modes: one that fetches content from an are.na channel of your choice and one that adds text blocks to it. For example: <Text code>https://www.are.na/kalli-retzepi/mais-oui-images</Text>
+    <div className="App" >
+      <Title style={{ color: `${themes[theme].font}` }} level={2}>are.na + hooks + typescript playground</Title>
+      <Text style={{ color: `${themes[theme].font}` }} type="secondary">This app has two modes: one that fetches content from an are.na channel of your choice and one that adds text blocks to it. For example: <Text code>https://www.are.na/kalli-retzepi/mais-oui-images</Text>
       </Text>
 
       {/*     FETCH MODE      */}
