@@ -7,7 +7,7 @@ import { ThemeContext } from "./ThemeProvider";
 function App() {
 
   // initialize antd elements
-  const { Title, Text } = Typography;
+  const { Title, Text, Paragraph} = Typography;
   const { TextArea } = Input;
   const {Meta} = Card;
 
@@ -20,7 +20,8 @@ function App() {
   const [mode, setMode] = useState(true)  // where fetchMode = true
   const inputEl = useRef(null); // creating a ref for input elements
   const textEl = useRef(null);
-  const [persistedData, setPersistedData] = usePersistedState([]);
+
+  const [persistedData, setPersistedData] = usePersistedState('fetchedData',[]);
 
   const themes = {
     light: {
@@ -28,15 +29,19 @@ function App() {
       background: "#fff"
     },
     dark: {
-      font: "#fff",
-      background: "#000"
+      font: "#254053",
+      background: "#5BDFBB"
     }
   };
   const { theme, toggleTheme } = useContext(ThemeContext);
+  const [fontColor, setFontColor] = useState('');
+
+  const token = '' // are.na token in order to POST, not needed right now
 
   function handleToggle() {  
     // toggles the mode, empties data array, resets channelURL, clears inputEl field
-    setMode(!mode)
+   
+    // setMode(!mode)
     setState((prevState) => ({
       ...prevState, 
       data: [],
@@ -83,7 +88,7 @@ function App() {
     fetch(`https://api.are.na/v2/channels/${state.channelURL}/blocks`,{
       method: 'POST',
       headers: {
-        'Authorization': 'Bearer d905ef20f9e5764f7a5dd418cf37c9fc68c37e6ab243343f53f9ccdcb7acbc78',
+        'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
       },
       //make sure to serialize your JSON body
@@ -115,19 +120,23 @@ function App() {
   useEffect(()=> {
     document.body.style.color = themes[theme].font;
     document.body.style.backgroundColor = themes[theme].background;
+    setFontColor(themes[theme].font)
   },[theme])
 
   return (
     <div className="App" >
-      <Title style={{ color: `${themes[theme].font}` }} level={2}>are.na + hooks + typescript playground</Title>
-      <Text style={{ color: `${themes[theme].font}` }} type="secondary">This app has two modes: one that fetches content from an are.na channel of your choice and one that adds text blocks to it. For example: <Text code>https://www.are.na/kalli-retzepi/mais-oui-images</Text>
-      </Text>
-
+      <Title style={{ color: `${fontColor}` }} level={1}>React Hooks playground</Title>
+      <Title style={{ color: `${fontColor}` }} level={4}>using <a href='https://ant.design/' target='_blank' rel="noopener noreferrer">ant.design</a> and typescript</Title>
+      <Row >
+        <Col span={16}>
+            <Paragraph style={{ color: `${fontColor}` }} type="secondary">Enter an <a href='https://www.are.na/' target='_blank' rel="noopener noreferrer">are.na</a> channel of your choice to fetch its images and display them below. You can copy and paste the following URL to get started. <Text copyable style={{ color: `${fontColor}` }} code>https://www.are.na/kalli-retzepi/mais-oui-images</Text></Paragraph>
+          </Col>
+      </Row>  
       {/*     FETCH MODE      */}
       {mode && 
         <div className='fetchMode' >
-          <Row style={{ margin: '16px 0' }}>
-            <Col span={12}>
+          <Row >
+            <Col span={10}>
               <Input 
               autoFocus 
               placeholder="Enter the channel URL" 
@@ -139,14 +148,18 @@ function App() {
               /> 
             </Col>
           </Row>      
-          <Button style={{ marginBottom: '2vh'}} onClick={getData} loading={state.loading}> Get channel contents </Button>
+          <Button style={{ margin: '2vh 0'}} onClick={getData} loading={state.loading}> Get channel contents </Button>
         
           <div className='cards'>
             {persistedData !== undefined && 
               persistedData.map( (item, i) => (
               <Card
                 key={i}
-                style={{ width: '20%', alignSelf: 'stretch', margin: '1vh 1vw 1vh 0'}}
+                style={{ 
+                  width: '20%', 
+                  alignSelf: 'stretch', 
+                  margin: '1vh 1vw 1vh 0',
+                }}
                 cover={
                   <img
                     alt="example"
@@ -164,7 +177,7 @@ function App() {
         </div>
       }
 
-      {/*     POST MODE        */}
+      {/*     POST MODE - disabled for now -       */}
       {!mode && 
         <div className='putMode'>
           <Row style={{ margin: '16px 0' }}>
@@ -201,10 +214,17 @@ function App() {
 
   
       {/*     TOGGLE        */}
-      <Row style={{ margin: '2vh 0'}}>
-        <Switch onChange={handleToggle}/>
-        <Text type="secondary" style={{ marginLeft: '0.2vw' }}>Toggle to other mode</Text>
-      </Row>
+      <Row style={{ margin: '45vh 0 2vh 0'}}>
+        <Col span={6}>
+          <Switch onChange={handleToggle}/>
+          <Text type="secondary" style={{ color: `${fontColor}` , marginLeft: '0.2vw' }}>Toggle theme</Text>
+        </Col>
+        <Col span={6}></Col>
+        <Col span={6}></Col>
+        <Col span={6}>
+          <Text type="secondary" style={{color: `${fontColor}` }}>link to github</Text>
+        </Col>
+      </Row>     
     </div>
   );
 }
