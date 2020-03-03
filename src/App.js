@@ -1,6 +1,8 @@
-import React, {useState, useEffect, useRef} from 'react';
+import React, {useState, useEffect, useRef, useContext} from 'react';
 import './App.css';
 import { Typography, Input, Row, Col, Card, Button, Switch} from 'antd';
+
+import { ThemeContext } from "./ThemeProvider";
 
 function App() {
 
@@ -19,6 +21,7 @@ function App() {
   const inputEl = useRef(null); // creating a ref for input elements
   const textEl = useRef(null);
   const [persistedData, setPersistedData] = usePersistedState([]);
+  const { theme, toggleTheme } = useContext(ThemeContext);
 
   function handleToggle() {  
     // toggles the mode, empties data array, resets channelURL, clears inputEl field
@@ -29,6 +32,7 @@ function App() {
       channelURL: ''
     }));
     inputEl.current.setValue('')
+    toggleTheme(theme === "light" ? "dark" : "light")
   }
 
   function usePersistedState(key, defaultValue) {
@@ -185,7 +189,6 @@ function App() {
         <Switch onChange={handleToggle}/>
         <Text type="secondary" style={{ marginLeft: '0.2vw' }}>Toggle to other mode</Text>
       </Row>
-
     </div>
   );
 }
