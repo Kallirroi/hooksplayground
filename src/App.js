@@ -218,7 +218,9 @@ function App() {
         <Col span={6}></Col>
         <Col span={6}></Col>
         <Col span={6}>
-          <Text type="secondary" style={{color: `${fontColor}` }}>link to github</Text>
+          <Text type="secondary" style={{color: `${fontColor}` }}>
+            <a href="https://github.com/Kallirroi/hooksplayground" target="_blank" rel="noopener noreferrer">link to github</a>
+          </Text>
         </Col>
       </Row>     
     </div>
