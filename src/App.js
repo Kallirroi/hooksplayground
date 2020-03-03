@@ -21,6 +21,17 @@ function App() {
   const inputEl = useRef(null); // creating a ref for input elements
   const textEl = useRef(null);
   const [persistedData, setPersistedData] = usePersistedState([]);
+
+  const themes = {
+  light: {
+    foreground: "#000000",
+    background: "#eeeeee"
+  },
+  dark: {
+    foreground: "#ffffff",
+    background: "#222222"
+  }
+};
   const { theme, toggleTheme } = useContext(ThemeContext);
 
   function handleToggle() {  
@@ -32,7 +43,7 @@ function App() {
       channelURL: ''
     }));
     inputEl.current.setValue('')
-    toggleTheme(theme === "light" ? "dark" : "light")
+    toggleTheme(theme);
   }
 
   function usePersistedState(key, defaultValue) {
@@ -102,7 +113,7 @@ function App() {
   },[persistedData])
 
   return (
-    <div className="App">
+    <div className="App" style={{backgroundColor: `${themes[theme].background}`, color: `${themes[theme].foreground}` }}>
       <Title level={2}>are.na + hooks + typescript playground</Title>
       <Text type="secondary">This app has two modes: one that fetches content from an are.na channel of your choice and one that adds text blocks to it. For example: <Text code>https://www.are.na/kalli-retzepi/mais-oui-images</Text>
       </Text>
