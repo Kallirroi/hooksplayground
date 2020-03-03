@@ -54,12 +54,12 @@ function App() {
   function usePersistedState(key, defaultValue) {
     // create the element in local storage if it doesn't exist
     const [state, setState] = useState(()=> {
-      return localStorage.getItem(key) || defaultValue
+      return JSON.parse(localStorage.getItem(key))  || defaultValue
     })
 
     // update the element at [key] position with state if needed
     useEffect(()=>{
-      if (state !== undefined) localStorage.setItem(key, state)
+      if (state !== undefined) localStorage.setItem(key, JSON.stringify(state))
     },[key, state])
 
     return [state, setState];
@@ -77,7 +77,7 @@ function App() {
         channelURL: ''
       })); 
       inputEl.current.setValue('')
-      setPersistedData(data.contents)
+      setPersistedData(data.contents);
     })
     .catch(error => console.log(error))
   }
